@@ -8,6 +8,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -155,8 +157,6 @@ public class MDateBox extends MValueBoxBase<Date> {
     // fix ios issue with onchange event
 
     if (MGWT.getOsDetection().isIOs()) {
-      // only set input type to date if there is a native picker iOS >= 5
-      impl.setType(box.getElement(), "date");
       // use w3c format
       format = W3C_FORMAT;
     }
@@ -175,9 +175,13 @@ public class MDateBox extends MValueBoxBase<Date> {
             @Override
             public void execute() {
               Date value = box.getValue();
-              ValueChangeEvent.fireIfNotEqual(box, lastValue, value);
-              lastValue = value;
-
+              if (value != null) {
+            	  ValueChangeEvent.fireIfNotEqual(box, lastValue, value);
+            	  lastValue = value;
+              } 
+              else {
+					impl.setType(box.getElement(), "text");
+			  }
             }
           });
 
@@ -185,7 +189,14 @@ public class MDateBox extends MValueBoxBase<Date> {
       });
       lastValue = null;
     }
-
+    
+	addFocusHandler(new FocusHandler() {
+		@Override
+		public void onFocus(FocusEvent event) {
+			impl.setType(box.getElement(), "date");
+		}
+	});
+	
   }
 
   /**
@@ -201,10 +212,9 @@ public class MDateBox extends MValueBoxBase<Date> {
 
     if (!MGWT.getOsDetection().isIOs()) {
       setPlaceHolder(pattern);
-    }
-
-    getBox().getDateParser().setFormat(format);
-    getBox().getDateRenderer().setFormat(format);
+      getBox().getDateParser().setFormat(format);
+      getBox().getDateRenderer().setFormat(format);
+    }    
 
   }
 
