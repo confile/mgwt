@@ -96,7 +96,12 @@ public class MDateBox extends MValueBoxBase<Date> {
 
     @Override
     public String render(Date object) {
-      return format.format(object);
+ 		if (object != null) {
+			return format.format(object);
+		}
+		else {
+			return "";
+		}
     }
 
     @Override
